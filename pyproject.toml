@@ -4,7 +4,9 @@ version = "0.0.0"
 description = "Parser of Open JTalk text-processing output, NJD features"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "pydantic>=2.11.5",
+]
 
 [tool.uv.sources]
 pyopenjtalk = { git = "https://github.com/VOICEVOX/pyopenjtalk", rev = "74703b034dd90a1f199f49bb70bf3b66b1728a86" } # synced with VOICEVOX ENGINE https://github.com/VOICEVOX/voicevox_engine/blob/master/pyproject.toml
