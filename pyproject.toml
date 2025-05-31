@@ -6,11 +6,14 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
+[tool.uv.sources]
+pyopenjtalk = { git = "https://github.com/VOICEVOX/pyopenjtalk", rev = "74703b034dd90a1f199f49bb70bf3b66b1728a86" } # synced with VOICEVOX ENGINE https://github.com/VOICEVOX/voicevox_engine/blob/master/pyproject.toml
+
 [dependency-groups]
 dev = [
     "mypy>=1.16.0",
     "pre-commit>=4.2.0",
-    "pyopenjtalk>=0.4.1",
+    "pyopenjtalk",
     "pytest>=8.3.5",
     "ruff>=0.11.12",
     "typos>=1.32.0",
@@ -20,7 +23,8 @@ dev = [
 select = ["ALL"]
 ignore = [
   "E501", # line-too-long
-  "COM812", # missing-trailing-comma. Handled by formatter
+  "COM812", # missing-trailing-comma. Handled by formatter.
+  "S101", # assert. Assert is recommended in pytest.
 ]
 
 [tool.ruff.lint.per-file-ignores]
