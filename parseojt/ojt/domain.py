@@ -1,13 +1,10 @@
 """Open JTalk structures."""
 
 from dataclasses import dataclass
-from typing import Any
-
-from pydantic import TypeAdapter
 
 
 @dataclass(frozen=True)
-class OjtFeat:
+class OjtFeature:
     """Open JTalk text-processing feature."""
 
     # NOTE:
@@ -24,18 +21,10 @@ class OjtFeat:
     ctype: str       # 活用型      conjugation type :
     cform: str       # 活用形      conjugation form :
     orig: str        # 原形        original form    :
-    read: str        # 読み        reading          : カタカナ表記。例として「ガッコウ」「デス」「、」「、」
-    pron: str        # 発音        pronunciation    : カタカナをベースとした特殊表記。例として「ガッコー」「デス’」「、」「、」 # noqa: RUF003
+    read: str        # 読み        reading          : 書き文字のカタカナ表記。例として「ガッコウ」「デス」「、」「、」
+    pron: str        # 発音        pronunciation    : 読む音声の特殊カタカナ表記。例として「ガッコー」「デス’」「、」「、」 # noqa: RUF003
     acc: int         # アクセント   accent          :
     mora_size: int   # モーラ数                     :
-    chain_rule: str  # 連結規則                     : 前の単語と連結してアクセント句をつくる際に句アクセントを移動する規則。
-    chain_flag: int  # 連結フラグ                   : 前の単語と連結してアクセント句をつくるか否かのフラグ。-1: 未判定 / 0: 連結しない / 1: 連結する
+    chain_rule: str  # 連結規則                     : 前のワードと連結してアクセント句をつくる際に句アクセントを移動する規則。
+    chain_flag: int  # 連結フラグ                   : 前のワードと連結してアクセント句をつくるか否かのフラグ。-1: 未判定 / 0: 連結しない / 1: 連結する
     # fmt: on
-
-
-_feat_adapter = TypeAdapter(OjtFeat)
-
-
-def as_ojt_feats(features: Any) -> list[OjtFeat]:  # noqa: ANN401, because this is validator
-    """Convert raw Open JTalk NJD features into typed and validated features."""
-    return list(map(_feat_adapter.validate_python, features))

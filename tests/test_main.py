@@ -1,1 +1,0 @@
-"""Tests main script."""
