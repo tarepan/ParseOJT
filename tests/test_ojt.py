@@ -1,18 +1,18 @@
 """Tests Open JTalk structures."""
 
-import pyopenjtalk  # type: ignore # noqa: PGH003
+import pyopenjtalk  # type: ignore # noqa: PGH003, because of external library's type missing
 
-from parseojt.ojt import as_ojt_words
+from parseojt.ojt import as_ojt_feats
 
 
-def test_ojt_word() -> None:
-    """`OjtWord` can be initialized with `pyopenjtalk.run_frontend()` output."""
+def test_as_ojt_feats() -> None:
+    """`as_ojt_feats()` can parse `pyopenjtalk.run_frontend()` output."""
     # Inputs
     text = "こんにちは、OpenJTalk のパーサーです。"
-    features = pyopenjtalk.run_frontend(text)
+    raw_features = pyopenjtalk.run_frontend(text)
     # Expects
-    true_n_word = 8
+    true_n_feat = 8
     # Outputs & Tests
-    ojt_words = as_ojt_words(features)
-    n_word = len(ojt_words)
-    assert n_word == true_n_word
+    ojt_feats = as_ojt_feats(raw_features)
+    n_feat = len(ojt_feats)
+    assert n_feat == true_n_feat

@@ -7,8 +7,8 @@ from pydantic import TypeAdapter
 
 
 @dataclass(frozen=True)
-class OjtWord:
-    """Open JTalk word."""
+class OjtFeat:
+    """Open JTalk text-processing feature."""
 
     # NOTE:
     #   Defined as `NJDNode` by openjtalk, in https://github.com/r9y9/open_jtalk/blob/462fc38e7520aa89e4d32b2611749208528c901e/src/njd/njd.h#L56-L73.
@@ -33,9 +33,9 @@ class OjtWord:
     # fmt: on
 
 
-_word_adapter = TypeAdapter(OjtWord)
+_feat_adapter = TypeAdapter(OjtFeat)
 
 
-def as_ojt_words(features: Any) -> list[OjtWord]:  # noqa: ANN401, because this is validator
-    """Convert Open JTalk NJD features into an OjtWord list."""
-    return list(map(_word_adapter.validate_python, features))
+def as_ojt_feats(features: Any) -> list[OjtFeat]:  # noqa: ANN401, because this is validator
+    """Convert raw Open JTalk NJD features into typed and validated features."""
+    return list(map(_feat_adapter.validate_python, features))
