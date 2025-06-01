@@ -3,7 +3,7 @@ name = "parseojt"
 version = "0.0.0"
 description = "Parser of Open JTalk text-processing output, NJD features"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 dependencies = [
     "pydantic>=2.11.5",
 ]
@@ -25,6 +25,8 @@ dev = [
 select = ["ALL"]
 ignore = [
   "E501", # line-too-long
+  "D400", # missing-trailing-period。Not supporting Japanese period `。`.
+  "D403", # first-word-uncapitalized。Not work consistently in Japanese.
   "COM812", # missing-trailing-comma. Handled by formatter.
   "S101", # assert. Assert is recommended in pytest.
 ]
