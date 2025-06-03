@@ -1,3 +1,4 @@
+"""Test utilities."""
 
 from typing import Final, Literal
 
@@ -9,9 +10,9 @@ def test_get_args_literal_alias() -> None:
     # Inputs
     type VowelSymbol = Literal["a", "A", "i", "I", "u", "pau"]
     # Outputs
-    VOWEL_SYMBOLS: Final[tuple[VowelSymbol, ...]] = get_args(VowelSymbol)
+    vowel_symbols: Final[tuple[VowelSymbol, ...]] = get_args(VowelSymbol)
     # Expects
-    TRUE_VOWEL_SYMBOLS = ("a", "A", "i", "I", "u", "pau")
+    true__vowel_symbols = ("a", "A", "i", "I", "u", "pau")
 
     # Tests
-    assert VOWEL_SYMBOLS == TRUE_VOWEL_SYMBOLS
+    assert vowel_symbols == true__vowel_symbols

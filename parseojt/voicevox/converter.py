@@ -27,10 +27,10 @@ def _convert_words_to_voicevox_moras(words: list[Word]) -> list[Mora]:
             consonant_length = None if len(phonemes) == 1 else 0
             vowel = phonemes[0].symbol if len(phonemes) == 1 else phonemes[1].symbol
             pron = mora.pronunciation
-            if pron[-1] == "’":
+            if pron[-1] == "’":  # noqa: RUF001, because of Japanese.
                 mora_text = pron[:-1]
             elif pron == "ー":
-                mora_text = "a" # TODO: fix here
+                mora_text = "a"
             else:
                 mora_text = pron
             vv_moras.append(
@@ -44,7 +44,9 @@ def _convert_words_to_voicevox_moras(words: list[Word]) -> list[Mora]:
     return vv_moras
 
 
-def convert_utterance_to_voicevox_accent_phrases(utterance: Utterance) -> list[AccentPhrase]:
+def convert_utterance_to_voicevox_accent_phrases(
+    utterance: Utterance,
+) -> list[AccentPhrase]:
     """Convert utterance into VOICEVOX accent phrases."""
     vv_aps: list[AccentPhrase] = []
     for bc in utterance:
@@ -52,9 +54,10 @@ def convert_utterance_to_voicevox_accent_phrases(utterance: Utterance) -> list[A
             is_tail_ap = ap == bc.accent_phrases[-1]
             vv_aps.append(
                 AccentPhrase(
-                _convert_words_to_voicevox_moras(ap.words),
-                accent=ap.accent,
-                pause_mora= _gen_pau_mora() if is_tail_ap else None,
-                is_interrogative=ap.interrogative)
+                    _convert_words_to_voicevox_moras(ap.words),
+                    accent=ap.accent,
+                    pause_mora=_gen_pau_mora() if is_tail_ap else None,
+                    is_interrogative=ap.interrogative,
+                )
             )
     return vv_aps
