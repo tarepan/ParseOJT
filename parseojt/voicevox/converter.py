@@ -17,6 +17,23 @@ def _gen_pau_mora() -> Mora:
     )
 
 
+def _aiueo_to_mora_pron(phoneme: str) -> str:
+    match phoneme:
+        case "a" | "A":
+            return "あ"
+        case "i" | "I":
+            return "い"
+        case "u" | "U":
+            return "う"
+        case "e" | "E":
+            return "え"
+        case "o" | "O":
+            return "お"
+        case _:
+            msg = f"音素 `{phoneme}` は長音に変換できません。"
+            raise RuntimeError(msg)
+
+
 def _convert_words_to_voicevox_moras(words: list[Word]) -> list[Mora]:
     """Convert words into VOICEVOX moras."""
     vv_moras: list[Mora] = []
@@ -25,12 +42,12 @@ def _convert_words_to_voicevox_moras(words: list[Word]) -> list[Mora]:
             phonemes = mora.phonemes
             consonant = None if len(phonemes) == 1 else phonemes[0].symbol
             consonant_length = None if len(phonemes) == 1 else 0
-            vowel = phonemes[0].symbol if len(phonemes) == 1 else phonemes[1].symbol
+            vowel = phonemes[-1].symbol
             pron = mora.pronunciation
             if pron[-1] == "’":  # noqa: RUF001, because of Japanese.
                 mora_text = pron[:-1]
             elif pron == "ー":
-                mora_text = "a"
+                mora_text = _aiueo_to_mora_pron(vowel)
             else:
                 mora_text = pron
             vv_moras.append(
