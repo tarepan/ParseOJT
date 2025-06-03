@@ -106,11 +106,6 @@ def _parse_as_moras(feat: OjtFeature) -> list[Mora]:
     return moras
 
 
-def _parse_as_wds(feats: list[OjtFeature]) -> list[Word]:
-    """Parse Open JTalk features into words."""
-    return [Word(_parse_as_moras(feat), feat.string) for feat in feats]
-
-
 def _is_chaining(feat: OjtFeature) -> bool:
     """Whether the feature is chaining or not."""
     return feat.chain_flag == 1
@@ -119,11 +114,17 @@ def _is_chaining(feat: OjtFeature) -> bool:
 def _parse_as_ap(feats: list[OjtFeature], *, interrogative: bool) -> AccentPhrase:
     """Parse Open JTalk features into an accent phrase."""
     # NOTE: length of `feats` is not zero (contract)
-    return AccentPhrase(
-        _parse_as_wds(feats),
-        feats[0].acc,  # NOTE: OJT records the phrase accent type in ap-head feature
-        interrogative=interrogative,
-    )
+    n_mora: int = 0
+    words: list[Word] = []
+    for feat in feats:
+        moras = _parse_as_moras(feat)
+        words.append(Word(moras, feat.string))
+        n_mora += len(moras)
+    # NOTE: OJT records the phrase accent type in ap-head feature
+    acc = feats[0].acc
+    # NOTE: Convert accent type into accent (アクセント核) position. Type 0 has 核 at last.
+    acc = acc if acc > 0 else n_mora
+    return AccentPhrase(words, acc, interrogative=interrogative)
 
 
 def _parse_as_aps(

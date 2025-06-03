@@ -37,6 +37,9 @@ ignore = [
   "RUF001", # ambiguous-unicode-character-string. Test Japanese strings.
   "RUF003", # ambiguous-unicode-character-comment. Test Japanese strings.
 ]
+"tests/tests_e2e/test_ojt_to_vv.py" = [
+  "ERA001", # commented-out-code. For external reference.
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "numpy"
