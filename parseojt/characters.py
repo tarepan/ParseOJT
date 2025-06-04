@@ -4,10 +4,16 @@ import re
 from itertools import groupby
 from typing import Final, Literal
 
-from parseojt.domain import ConsonantSymbol, VowelSymbol
 from parseojt.utils import get_args
 
 # fmt: off
+# NOTE: Same as Open JTalk. ref: https://github.com/r9y9/open_jtalk/blob/462fc38e7520aa89e4d32b2611749208528c901e/src/jpcommon/jpcommon_rule_utf_8.h#L63-L236
+type ConsonantSymbol = Literal["k", "ky", "kw", "g", "gy", "gw", "s", "sh", "z", "j", "t", "ch", "ts", "ty", "d", "dy", "n", "ny", "h", "hy", "f", "b", "by", "p", "py", "m", "my", "y", "r", "ry", "w", "v"]
+type VowelSymbol = Literal["a", "A", "i", "I", "u", "U", "e", "E", "o", "O", "N", "cl", "pau"]  # NOTE: "A/I/U/E/O" is 無声化母音, "N" is 撥音, "cl" is 促音, "pau" is 無音.
+type PhonemeSymbol = ConsonantSymbol | VowelSymbol
+CONSONANT_SYMBOLS: Final[tuple[ConsonantSymbol, ...]] = get_args(ConsonantSymbol)
+VOWEL_SYMBOLS: Final[tuple[VowelSymbol, ...]] = get_args(VowelSymbol)
+PHONEME_SYMBOLS: Final[tuple[PhonemeSymbol, ...]] = CONSONANT_SYMBOLS + VOWEL_SYMBOLS
 
 # missing phonemes:
 #     /hu/, /yi/, /tye/ /dye/
@@ -228,7 +234,7 @@ def _generate_mora_match_pattern(mora_simbols: tuple[str, ...]) -> re.Pattern[st
     """Generate a mora-match pattern."""
     _size_ordered_simbols = sorted(mora_simbols, key=len, reverse=True)
     _n_length_groups = [list(group) for _, group in groupby(_size_ordered_simbols, len)]
-    _pattern = "ー"
+    _pattern = "、|？|ー"  # noqa: RUF001, because of Japanese.
     for i_length_group in _n_length_groups:
         for simbol in [m + "’" for m in i_length_group] + i_length_group:  # noqa: RUF001, because of Japanese.
             _pattern += f"|{simbol}"

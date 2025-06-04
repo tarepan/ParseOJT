@@ -1,8 +1,11 @@
 """Tree-To-VOICEVOX converter."""
 
+from itertools import batched
 from typing import Final
+from warnings import warn
 
-from parseojt.domain import Tree, Word
+from parseojt.domain import Group, MarkGroup, Tree, Word
+from parseojt.gardener import extract_text
 from parseojt.voicevox.domain import AccentPhrase, Mora
 
 _NON_VV_MORA_MAPPING = {
@@ -98,23 +101,51 @@ def _convert_words_to_voicevox_moras(words: list[Word]) -> list[Mora]:
     return vv_moras
 
 
+def _contain_interrogative(mg: Group) -> bool:
+    """Whether the group contains interrogative or not."""
+    text = ""
+    for ap in mg.accent_phrases:
+        for wd in ap.words:
+            text += wd.text
+    return "？" in text  # noqa: RUF001, because of Japanese.
+
+
 def convert_tree_to_voicevox_accent_phrases(
-    utterance: Tree,
+    tree: Tree,
 ) -> list[AccentPhrase]:
     """Convert tree into VOICEVOX accent phrases."""
+    # Remove tree-head MarkGroup.
+    if isinstance(tree[0], MarkGroup):
+        texts = extract_text(tree[0:1])
+        msg = f"「{texts}」には音がありません。文頭に来れないため無視されます。"
+        warn(msg, stacklevel=2)
+        tree = tree[1:]
+
+    # Divide groups into BG-MG pairs
+    bg_mg_pairs = list(batched(tree, 2))
+
+    # Generate accent phrases
     vv_aps: list[AccentPhrase] = []
-    for bc in utterance:
-        is_tail_bc = bc == utterance[-1]
-        for ap in bc.accent_phrases:
-            is_tail_ap = ap == bc.accent_phrases[-1]
+    for i, bg_mg in enumerate(bg_mg_pairs):
+        # Last pair can be not pair, just BG 1-tuple.
+        bg = bg_mg[0]
+        mg = bg_mg[1] if len(bg_mg) == 2 else None  # noqa: PLR2004, because length of pair equal to 2 is apparent.
+
+        is_tail_bg = i == len(bg_mg_pairs) - 1
+        is_interrogative_bg = _contain_interrogative(mg) if mg else False
+
+        for ap in bg.accent_phrases:
+            is_tail_ap = ap == bg.accent_phrases[-1]
             # NOTE: VOICEVOX delete utterance tail pause.
-            with_pau = is_tail_ap and not is_tail_bc
+            with_pau = is_tail_ap and not is_tail_bg
+            interrogative = is_tail_ap and is_interrogative_bg
             vv_aps.append(
                 AccentPhrase(
                     _convert_words_to_voicevox_moras(ap.words),
                     accent=ap.accent,
                     pause_mora=_gen_pau_mora() if with_pau else None,
-                    is_interrogative=ap.interrogative,
+                    is_interrogative=interrogative,
                 )
             )
+
     return vv_aps

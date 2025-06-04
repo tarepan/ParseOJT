@@ -1,6 +1,6 @@
 """OJT-to-domain parser."""
 
-from itertools import batched, groupby
+from itertools import groupby
 from typing import TypeGuard
 from warnings import warn
 
@@ -8,18 +8,18 @@ from parseojt.characters import (
     MORA_MATCH_PATTERN,
     MORA_PRONUNCIATION,
     MR_CV,
+    VOWEL_SYMBOLS,
     MoraPronunciation,
+    VowelSymbol,
 )
 
 from .domain import (
-    VOWEL_SYMBOLS,
     AccentPhrase,
-    BreathClause,
-    Consonant,
+    BreathGroup,
+    MarkGroup,
     Mora,
+    Phoneme,
     Tree,
-    Vowel,
-    VowelSymbol,
     Word,
 )
 from .ojt.domain import OjtFeature
@@ -55,7 +55,7 @@ def _is_mora_pronunciation(pron: str) -> TypeGuard[MoraPronunciation]:
 
 def _parse_as_phonemes(
     mora_pron_unvoice: tuple[str, bool],
-) -> tuple[Consonant, Vowel] | tuple[Vowel]:
+) -> tuple[Phoneme, Phoneme] | tuple[Phoneme]:
     mora_pron = mora_pron_unvoice[0]
     if not _is_mora_pronunciation(mora_pron):
         raise RuntimeError
@@ -70,8 +70,8 @@ def _parse_as_phonemes(
         else:
             msg = "無声化は /-a/ /-i/ /-u/ /-e/ /-o/ でのみ可能です。{vowel_symbol} には適用できないため無視されます。"
             warn(msg, stacklevel=2)
-    v = Vowel(vowel_symbol)
-    return (Consonant(consonant_symbol), v) if consonant_symbol else (v,)
+    v = Phoneme(vowel_symbol, unvoicing=mora_pron_unvoice[1])
+    return (Phoneme(consonant_symbol), v) if consonant_symbol else (v,)
 
 
 def _parse_as_moras(feat: OjtFeature) -> list[Mora]:
@@ -98,10 +98,16 @@ def _parse_as_moras(feat: OjtFeature) -> list[Mora]:
     # Convert mr-wise pronunciation into Mora.
     moras: list[Mora] = []
     for mr_pron in mr_prons:
-        if mr_pron[0] == "ー":
-            moras.append(Mora((Vowel(moras[-1].phonemes[-1].symbol),), mr_pron[0]))
-        else:
-            moras.append(Mora(_parse_as_phonemes(mr_pron), mr_pron[0]))
+        match mr_pron[0]:
+            case "ー":
+                # NOTE: needs unvoicing check?
+                moras.append(
+                    Mora((Phoneme(moras[-1].phonemes[-1].symbol),), mr_pron[0])
+                )
+            case "、" | "？":  # noqa: RUF001, because of Japanese.
+                moras.append(Mora((Phoneme("pau"),), mr_pron[0]))
+            case _:
+                moras.append(Mora(_parse_as_phonemes(mr_pron), mr_pron[0]))
 
     return moras
 
@@ -111,7 +117,7 @@ def _is_chaining(feat: OjtFeature) -> bool:
     return feat.chain_flag == 1
 
 
-def _parse_as_ap(feats: list[OjtFeature], *, interrogative: bool) -> AccentPhrase:
+def _parse_as_ap(feats: list[OjtFeature]) -> AccentPhrase:
     """Parse Open JTalk features into an accent phrase."""
     # NOTE: length of `feats` is not zero (contract)
     n_mora: int = 0
@@ -124,12 +130,10 @@ def _parse_as_ap(feats: list[OjtFeature], *, interrogative: bool) -> AccentPhras
     acc = feats[0].acc
     # NOTE: Convert accent type into accent (アクセント核) position. Type 0 has 核 at last.
     acc = acc if acc > 0 else n_mora
-    return AccentPhrase(words, acc, interrogative=interrogative)
+    return AccentPhrase(words, acc)
 
 
-def _parse_as_aps(
-    feats: list[OjtFeature], *, last_interrogative: bool
-) -> list[AccentPhrase]:
+def _parse_as_aps(feats: list[OjtFeature]) -> list[AccentPhrase]:
     """Parse Open JTalk features into accent phrases."""
     # NOTE:
     #   Chain flag divide features into accent phrases.
@@ -159,90 +163,23 @@ def _parse_as_aps(
     if len(ap_wises) == 0:
         return []
 
-    # Convert ap-wise features into AccentPhrase.
-    #   [n,c,c,| n,c,c,c,| n,| n,c] -> [AP#0, AP#1, AP#2, AP#3]
-    tail_ap = [_parse_as_ap(ap_wises[-1], interrogative=last_interrogative)]
-    return [
-        _parse_as_ap(ap_wise, interrogative=False) for ap_wise in ap_wises[:-1]
-    ] + tail_ap
+    return [_parse_as_ap(ap_wise) for ap_wise in ap_wises]
 
 
-def _is_pau(word: OjtFeature) -> bool:
-    """Whether the word is pause or not."""
+def _is_mark(word: OjtFeature) -> bool:
+    """Whether the word is mark or not."""
     return word.pron in ["、", "？"]  # noqa: RUF001, because of Japanese.
 
 
-def _is_interrogative(word: OjtFeature) -> bool:
-    """Whether the word is interrogative or not."""
-    return word.pron == "？"  # noqa: RUF001, because of Japanese.
-
-
-class NonBreathError(ParseError):
-    """The feature is not a breath feature."""
-
-
-def _parse_as_breath_word(breath_features: list[OjtFeature]) -> Word | None:
-    """Parse breath features as a breath word."""
-    # NOTE: interpreted as no breath
-    if len(breath_features) == 0:
-        return None
-
-    # Validate
-    if not all(map(_is_pau, breath_features)):
-        msg = "Non-breath feature comes to `parse_breaths()`."
-        raise NonBreathError(msg)
-
-    # Parse
-    phonemes = (Vowel(symbol="pau"),)
-    text = "".join([feat.string for feat in breath_features])
-
-    return Word([Mora(phonemes, "、")], text)
-
-
-def _parse_as_bcs(feats: list[OjtFeature]) -> list[BreathClause]:
-    """Parse Open JTalk features into breath clauses."""
-    # NOTE:
-    #   PAUs divide features into breath clauses.
-    #   [division example]
-    #     v: voice feature, p: pause feature
-    #                                  BC#0     BC#1      BC#2  BC#3
-    #   [v,v,p,v,v,v,p,p,v,p,v,v] -> [v,v,p,| v,v,v,p,p,| v,p,| v,v]
-
+# def parse_ojt_as_tree(feats: list[OjtFeature]) -> Tree:
+def parse_ojt_features(feats: list[OjtFeature]) -> Tree:
+    """Open JTalk のテキスト処理結果を Tree としてパースする。"""
     if len(feats) == 0:
         return []
 
-    # Group successive voices and successive pauses.
-    #   [v,v,p,v,v,v,p,p,v,p,v,v] -> [v,v,| p,| v,v,v,| p,p,| v,| p,| v,v]
-    groups = [list(group) for _, group in groupby(feats, _is_pau)]
-
-    # Remove ut-head pauses.
-    #   [p,p,p,| v,v,| p,| ...] -> [v,v,| p,| ...]
-    if _is_pau(groups[0][0]):
-        texts = "".join([w.string for w in groups[0]])
-        msg = f"「{texts}」は音がないワードです。文頭に来れないため、無視されます。"
-        warn(msg, stacklevel=2)
-        if len(groups) == 1:
-            # No not-ignored feature remains.
-            return []
-        groups = groups[1:]
-
-    # Convert bc-wise voices/pauses into BreathClause.
-    #   [v,v,| p,| v,v,v,| p,p,| v,| p,| v,v] -> [BC#0, BC#1, BC#2, BC#3]
-    bcs: list[BreathClause] = []
-    for bc_wise_vs_ps in batched(groups, 2):
-        bc_wise_voices = bc_wise_vs_ps[0]
-        # NOTE: 'No-end-period text' is converted to 'No-end-pau features' by OJT.
-        bc_wise_pauses = bc_wise_vs_ps[1] if len(bc_wise_vs_ps) > 1 else []
-        is_interrogative_pause = any(map(_is_interrogative, bc_wise_pauses))
-        bc = BreathClause(
-            _parse_as_aps(bc_wise_voices, last_interrogative=is_interrogative_pause),
-            _parse_as_breath_word(bc_wise_pauses),
-        )
-        bcs.append(bc)
-
-    return bcs
-
-
-def parse_ojt_features(ojt_feats: list[OjtFeature]) -> Tree:
-    """Parse Open JTalk feature series into a tree."""
-    return _parse_as_bcs(ojt_feats)
+    tree: Tree = []
+    # Divide features into successive voices (BreathGroup) and successive marks (MarkGroup).
+    for is_marks, successive_feats in groupby(feats, _is_mark):
+        aps = _parse_as_aps(list(successive_feats))
+        tree += [MarkGroup(aps) if is_marks else BreathGroup(aps)]
+    return tree
