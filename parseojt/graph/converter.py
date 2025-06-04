@@ -1,8 +1,8 @@
-"""Utterance-To-Graph converter."""
+"""Tree-To-Graph converter."""
 
-from parseojt.domain import Utterance
+from parseojt.domain import Tree
 
 
-def convert_utterance_to_graph(utterance: Utterance) -> None:
+def convert_tree_to_graph(utterance: Tree) -> None:
     """Visualize utterance as a graph."""
     _ = utterance

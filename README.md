@@ -21,7 +21,7 @@ Parser of Open JTalk text-processing output (NJD features).
 
 ```mermaid
 graph TD;
-    A["Open JTalk NJD features"] --> B["Utterance"];
+    A["Open JTalk NJD features"] --> B["Tree"];
     B --> C["VOICEVOX AccentPhrases"];
     B --> D["visual graph"];
 ```

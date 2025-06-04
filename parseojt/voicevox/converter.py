@@ -1,8 +1,8 @@
-"""Utterance-To-VOICEVOX converter."""
+"""Tree-To-VOICEVOX converter."""
 
 from typing import Final
 
-from parseojt.domain import Utterance, Word
+from parseojt.domain import Tree, Word
 from parseojt.voicevox.domain import AccentPhrase, Mora
 
 _NON_VV_MORA_MAPPING = {
@@ -98,10 +98,10 @@ def _convert_words_to_voicevox_moras(words: list[Word]) -> list[Mora]:
     return vv_moras
 
 
-def convert_utterance_to_voicevox_accent_phrases(
-    utterance: Utterance,
+def convert_tree_to_voicevox_accent_phrases(
+    utterance: Tree,
 ) -> list[AccentPhrase]:
-    """Convert utterance into VOICEVOX accent phrases."""
+    """Convert tree into VOICEVOX accent phrases."""
     vv_aps: list[AccentPhrase] = []
     for bc in utterance:
         is_tail_bc = bc == utterance[-1]

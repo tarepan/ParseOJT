@@ -17,7 +17,7 @@ from .domain import (
     BreathClause,
     Consonant,
     Mora,
-    Utterance,
+    Tree,
     Vowel,
     VowelSymbol,
     Word,
@@ -243,6 +243,6 @@ def _parse_as_bcs(feats: list[OjtFeature]) -> list[BreathClause]:
     return bcs
 
 
-def parse_ojt_features(ojt_feats: list[OjtFeature]) -> Utterance:
-    """Parse Open JTalk feature series into a hierarchical utterance."""
+def parse_ojt_features(ojt_feats: list[OjtFeature]) -> Tree:
+    """Parse Open JTalk feature series into a tree."""
     return _parse_as_bcs(ojt_feats)

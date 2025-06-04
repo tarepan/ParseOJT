@@ -10,8 +10,8 @@ from parseojt.domain import (
 )
 
 
-def test_utterance_init() -> None:
-    """Utterance can be initialized."""
+def test_tree_init() -> None:
+    """Tree can be initialized."""
     # Outputs & Tests
     # NOTE: text is `あら？どうもこんにちは、パンダ先生`
     _ = [

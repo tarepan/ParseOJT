@@ -84,4 +84,4 @@ class BreathClause:
     breath: Word | None  # `None` means sentence end.
 
 
-type Utterance = list[BreathClause]
+type Tree = list[BreathClause]
