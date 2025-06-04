@@ -10,9 +10,17 @@ from parseojt.characters import (
     MR_CV,
     MoraPronunciation,
 )
+from parseojt.domain import (
+    AccentPhrase,
+    BreathGroup,
+    MarkGroup,
+    Mora,
+    Phoneme,
+    Tree,
+    Word,
+)
 
-from .domain import AccentPhrase, BreathGroup, MarkGroup, Mora, Phoneme, Tree, Word
-from .ojt.domain import OjtFeature
+from .domain import OjtFeature
 
 
 def _split_pron_into_mora_prons(pron: str) -> list[tuple[str, bool]]:

@@ -5,7 +5,7 @@ from typing import Any
 
 from .domain import Tree
 from .ojt.loader import as_ojt_features
-from .parser import parse_ojt_as_tree
+from .ojt.parser import parse_ojt_as_tree
 from .voicevox.converter import convert_tree_to_voicevox_accent_phrases
 from .voicevox.domain import AccentPhrase
 
