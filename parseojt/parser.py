@@ -8,20 +8,10 @@ from parseojt.characters import (
     MORA_MATCH_PATTERN,
     MORA_PRONUNCIATION,
     MR_CV,
-    VOWEL_SYMBOLS,
     MoraPronunciation,
-    VowelSymbol,
 )
 
-from .domain import (
-    AccentPhrase,
-    BreathGroup,
-    MarkGroup,
-    Mora,
-    Phoneme,
-    Tree,
-    Word,
-)
+from .domain import AccentPhrase, BreathGroup, MarkGroup, Mora, Phoneme, Tree, Word
 from .ojt.domain import OjtFeature
 
 
@@ -41,14 +31,6 @@ def _split_pron_into_mora_prons(pron: str) -> list[tuple[str, bool]]:
     return mora_prons
 
 
-class ParseError(Exception):
-    """Parse failed."""
-
-
-def _is_vowel_symbol(symbol: str) -> TypeGuard[VowelSymbol]:
-    return symbol in VOWEL_SYMBOLS
-
-
 def _is_mora_pronunciation(pron: str) -> TypeGuard[MoraPronunciation]:
     return pron in MORA_PRONUNCIATION
 
@@ -60,16 +42,6 @@ def _parse_as_phonemes(
     if not _is_mora_pronunciation(mora_pron):
         raise RuntimeError
     consonant_symbol, vowel_symbol = MR_CV[mora_pron]
-    if mora_pron_unvoice[1]:
-        if vowel_symbol in ["a", "i", "u", "e", "o"]:
-            _vowel_symbol = vowel_symbol.upper()
-            if not _is_vowel_symbol(_vowel_symbol):
-                msg = "Never"
-                raise RuntimeError(msg)
-            vowel_symbol = _vowel_symbol
-        else:
-            msg = "無声化は /-a/ /-i/ /-u/ /-e/ /-o/ でのみ可能です。{vowel_symbol} には適用できないため無視されます。"
-            warn(msg, stacklevel=2)
     v = Phoneme(vowel_symbol, unvoicing=mora_pron_unvoice[1])
     return (Phoneme(consonant_symbol), v) if consonant_symbol else (v,)
 
@@ -84,30 +56,28 @@ def _parse_as_moras(feat: OjtFeature) -> list[Mora]:
     if feat.pron == "":
         return []
 
-    mr_prons = _split_pron_into_mora_prons(feat.pron)
+    pron_unvoice_pairs = _split_pron_into_mora_prons(feat.pron)
 
     # Validate
-    if mr_prons[0][0] == "ー":
+    if pron_unvoice_pairs[0][0] == "ー":
         msg = "長音（`ー`）はワードの先頭に置けません。この長音は無視されます。"  # noqa: RUF001, because of Japanese.
         warn(msg, stacklevel=2)
-        if len(mr_prons) == 1:
+        if len(pron_unvoice_pairs) == 1:
             # No not-ignored mora remains.
             return []
-        mr_prons = mr_prons[1:]
+        pron_unvoice_pairs = pron_unvoice_pairs[1:]
 
     # Convert mr-wise pronunciation into Mora.
     moras: list[Mora] = []
-    for mr_pron in mr_prons:
-        match mr_pron[0]:
+    for pron, unvoice in pron_unvoice_pairs:
+        match pron:
             case "ー":
-                # NOTE: needs unvoicing check?
-                moras.append(
-                    Mora((Phoneme(moras[-1].phonemes[-1].symbol),), mr_pron[0])
-                )
+                v = Phoneme(moras[-1].phonemes[-1].symbol, unvoicing=unvoice)
+                moras.append(Mora((v,), pron))
             case "、" | "？":  # noqa: RUF001, because of Japanese.
-                moras.append(Mora((Phoneme("pau"),), mr_pron[0]))
+                moras.append(Mora((Phoneme("pau"),), pron[0]))
             case _:
-                moras.append(Mora(_parse_as_phonemes(mr_pron), mr_pron[0]))
+                moras.append(Mora(_parse_as_phonemes((pron, unvoice)), pron))
 
     return moras
 
@@ -171,8 +141,7 @@ def _is_mark(word: OjtFeature) -> bool:
     return word.pron in ["、", "？"]  # noqa: RUF001, because of Japanese.
 
 
-# def parse_ojt_as_tree(feats: list[OjtFeature]) -> Tree:
-def parse_ojt_features(feats: list[OjtFeature]) -> Tree:
+def parse_ojt_as_tree(feats: list[OjtFeature]) -> Tree:
     """Open JTalk のテキスト処理結果を Tree としてパースする。"""
     if len(feats) == 0:
         return []

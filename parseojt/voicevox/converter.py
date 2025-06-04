@@ -50,6 +50,11 @@ def _gen_pau_mora() -> Mora:
     )
 
 
+def _unvoiced_symbol(symbol: str) -> str:
+    """Convert the symbol into unvoiced phoneme symbol."""
+    return symbol.upper()
+
+
 def _aiueo_to_mora_pron(phoneme: str) -> str:
     match phoneme:
         case "a" | "A":
@@ -79,23 +84,31 @@ def _convert_words_to_voicevox_moras(words: list[Word]) -> list[Mora]:
     for word in words:
         for mora in word.moras:
             phonemes = mora.phonemes
-            consonant = None if len(phonemes) == 1 else phonemes[0].symbol
+
+            consonant_symbol = None if len(phonemes) == 1 else phonemes[0].symbol
             consonant_length = None if len(phonemes) == 1 else 0.0
-            vowel = phonemes[-1].symbol
+
+            vowel = phonemes[-1]
+            vowel_symbol = (
+                _unvoiced_symbol(vowel.symbol) if vowel.unvoicing else vowel.symbol
+            )
+            vowel_length = 0.0
+
             pron = mora.pronunciation
             if pron[-1] == "’":  # noqa: RUF001, because of Japanese.
                 mora_text = pron[:-1]
             elif pron == "ー":
                 # NOTE: VOICEVOX losts prolonged sound mark. Only realized phonemes remain.
-                mora_text = _aiueo_to_mora_pron(vowel)
+                mora_text = _aiueo_to_mora_pron(vowel_symbol)
             else:
                 mora_text = pron
             vv_moras.append(
                 Mora(
                     text=_replace_mora_pron(mora_text),
-                    consonant=consonant,
+                    consonant=consonant_symbol,
                     consonant_length=consonant_length,
-                    vowel=vowel,
+                    vowel=vowel_symbol,
+                    vowel_length=vowel_length,
                 )
             )
     return vv_moras
@@ -114,6 +127,10 @@ def convert_tree_to_voicevox_accent_phrases(
     tree: Tree,
 ) -> list[AccentPhrase]:
     """Convert tree into VOICEVOX accent phrases."""
+    # Validation on VOICEVOX standards
+    # unvoicing check ["a", "i", "u", "e", "o"]
+    # "無声化は /-a/ /-i/ /-u/ /-e/ /-o/ でのみ可能です。{vowel_symbol} には適用できないため無視されます。
+
     # Remove tree-head MarkGroup.
     if isinstance(tree[0], MarkGroup):
         texts = extract_text(tree[0:1])

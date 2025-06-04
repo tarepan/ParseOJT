@@ -11,7 +11,7 @@ class Mora:
     consonant: str | None
     consonant_length: float | None
     vowel: str
-    vowel_length: float = 0.0
+    vowel_length: float
     pitch: float = 0.0
 
 
