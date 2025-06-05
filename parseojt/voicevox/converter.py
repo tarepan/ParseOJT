@@ -4,8 +4,8 @@ from itertools import batched
 from typing import Final
 from warnings import warn
 
-from parseojt.domain import Group, MarkGroup, Tree, Word
 from parseojt.gardener import extract_text
+from parseojt.tree import MarkGroup, PhraseGroup, Tree, Word
 from parseojt.voicevox.domain import AccentPhrase, Mora
 
 _NON_VV_MORA_MAPPING = {
@@ -114,10 +114,10 @@ def _convert_words_to_voicevox_moras(words: list[Word]) -> list[Mora]:
     return vv_moras
 
 
-def _contain_interrogative(mg: Group) -> bool:
+def _contain_interrogative(pg: PhraseGroup) -> bool:
     """Whether the group contains interrogative or not."""
     text = ""
-    for ap in mg.accent_phrases:
+    for ap in pg.accent_phrases:
         for wd in ap.words:
             text += wd.text
     return "？" in text  # noqa: RUF001, because of Japanese.

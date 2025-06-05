@@ -1,6 +1,6 @@
 """Tree-To-Graph converter."""
 
-from parseojt.domain import Tree
+from parseojt.tree import Tree
 
 
 def convert_tree_to_graph(utterance: Tree) -> None:

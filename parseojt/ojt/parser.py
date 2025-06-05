@@ -10,7 +10,7 @@ from parseojt.characters import (
     MR_CV,
     MoraPronunciation,
 )
-from parseojt.domain import (
+from parseojt.tree import (
     AccentPhrase,
     BreathGroup,
     MarkGroup,
