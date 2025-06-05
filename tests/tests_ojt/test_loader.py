@@ -2,7 +2,7 @@
 
 import pyopenjtalk  # type: ignore # noqa: PGH003, because of external library's type missing
 
-from parseojt.ojt.loader import as_ojt_features
+from speechtree.ojt.loader import as_ojt_features
 
 
 def test_as_ojt_features() -> None:

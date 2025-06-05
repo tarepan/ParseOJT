@@ -1,7 +1,7 @@
 [project]
-name = "parseojt"
+name = "speechtree"
 version = "0.0.0"
-description = "Parser of Open JTalk text-processing output, NJD features"
+description = "Simple but rich tree-structure representing speech text"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -32,7 +32,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"parseojt/tree.py" = [
+"speechtree/tree.py" = [
   "RUF001", # ambiguous-unicode-character-string. Define containers for Japanese.
   "RUF002", # ambiguous-unicode-character-docstring. Define containers for Japanese.
   "RUF003", # ambiguous-unicode-character-comment. Define containers for Japanese.

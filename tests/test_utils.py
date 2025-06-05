@@ -2,7 +2,7 @@
 
 from typing import Final, Literal
 
-from parseojt.utils import get_args
+from speechtree.utils import get_args
 
 
 def test_get_args_literal_alias() -> None:

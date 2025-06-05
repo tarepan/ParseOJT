@@ -1,7 +1,7 @@
 """Tree management tools."""
 
 # Check
-from parseojt.tree import MarkGroup, Tree
+from speechtree.tree import MarkGroup, Tree
 
 
 # charset

@@ -2,8 +2,8 @@
 
 import pyopenjtalk  # type: ignore # noqa: PGH003, because of external library's type missing
 
-from parseojt.e2e import ojt_raw_features_to_vv_accent_phrases
-from parseojt.voicevox.domain import AccentPhrase, Mora
+from speechtree.e2e import ojt_raw_features_to_vv_accent_phrases
+from speechtree.voicevox.domain import AccentPhrase, Mora
 
 
 def test_ojt_raw_features_to_vv_accent_phrases_valid_text() -> None:

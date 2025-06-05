@@ -4,7 +4,7 @@ import re
 from itertools import groupby
 from typing import Final, Literal
 
-from parseojt.utils import get_args
+from speechtree.utils import get_args
 
 # fmt: off
 # NOTE: Same as Open JTalk. ref: https://github.com/r9y9/open_jtalk/blob/462fc38e7520aa89e4d32b2611749208528c901e/src/jpcommon/jpcommon_rule_utf_8.h#L63-L236

@@ -16,9 +16,6 @@ graph = parse_as_graph(tree)  # Beautiful graph, see below ✨️
 
 [graph]
 
-# ParseOJT
-Parser of Open JTalk text-processing output (NJD features).
-
 ```mermaid
 graph TD;
     A["Open JTalk NJD features"] --> B["Tree"];

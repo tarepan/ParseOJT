@@ -4,13 +4,13 @@ from itertools import groupby
 from typing import TypeGuard
 from warnings import warn
 
-from parseojt.characters import (
+from speechtree.characters import (
     MORA_MATCH_PATTERN,
     MORA_PRONUNCIATION,
     MR_CV,
     MoraPronunciation,
 )
-from parseojt.tree import (
+from speechtree.tree import (
     AccentPhrase,
     BreathGroup,
     MarkGroup,

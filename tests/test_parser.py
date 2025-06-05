@@ -1,7 +1,7 @@
 """Test Open JTalk feature parser."""
 
-from parseojt.ojt.domain import OjtFeature
-from parseojt.ojt.parser import parse_ojt_as_tree
+from speechtree.ojt.domain import OjtFeature
+from speechtree.ojt.parser import parse_ojt_as_tree
 
 
 def _gen_ft(

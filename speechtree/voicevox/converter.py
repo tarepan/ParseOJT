@@ -4,9 +4,9 @@ from itertools import batched
 from typing import Final
 from warnings import warn
 
-from parseojt.gardener import extract_text
-from parseojt.tree import MarkGroup, PhraseGroup, Tree, Word
-from parseojt.voicevox.domain import AccentPhrase, Mora
+from speechtree.gardener import extract_text
+from speechtree.tree import MarkGroup, PhraseGroup, Tree, Word
+from speechtree.voicevox.domain import AccentPhrase, Mora
 
 _NON_VV_MORA_MAPPING = {
     "ヲ": "オ",
