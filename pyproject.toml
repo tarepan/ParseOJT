@@ -32,6 +32,11 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+"parseojt/tree.py" = [
+  "RUF001", # ambiguous-unicode-character-string. Define containers for Japanese.
+  "RUF002", # ambiguous-unicode-character-docstring. Define containers for Japanese.
+  "RUF003", # ambiguous-unicode-character-comment. Define containers for Japanese.
+]
 "tests/**/test_*.py" = [
   "D103", # undocumented-public-function. Because D103 force docstring on pytest target functions `test_*()` even if contents are apparent from name.
   "RUF001", # ambiguous-unicode-character-string. Test Japanese strings.
