@@ -8,13 +8,20 @@ Represent speech text with simple-but-rich tree structure, Convert from/to popul
 </div>
 
 ```python
-ojt = openjtalk.run_frontend("相互運用性って良いよね。")
+ojt = pyopenjtalk.run_frontend("相互運用性って良いよね。")
 tree = parse_ojt_features(ojt)
 vv = parse_as_voicevox(tree)  # Use it for speech synthesis by VOICEVOX API 🎉
 graph = parse_as_graph(tree)  # Beautiful graph, see below ✨️
 ```
 
 [graph]
+
+## SpeechTree について
+SpeechTree は日本語テキスト音声合成のテキスト処理と波形合成をつなぐ、シンプルかつリッチな中間表現およびツールです。  
+
+従来は各 TTS が各々実装していたテキスト処理と波形合成の接続を、SpeechTree が置き換えます。  
+波形合成器の開発者は Tree 入力に対応するだけで Open JTalk 等のテキスト処理を利用できます。  
+テキスト処理の開発者は Tree 出力に対応するだけで VOICEVOX 等の波形合成器が利用できます。  
 
 ```mermaid
 graph TD;
@@ -23,21 +30,71 @@ graph TD;
     B --> D["visual graph"];
 ```
 
-## Dev
-### All-in Check
+## 使い方
+### インストールする
 ```bash
-## check-and-fix
-uv run mypy . && uv run ruff check --fix && uv run ruff format && uv run typos && uv run pytest
+pip install speechtree
 ```
 
-### All-in Static Program Analysis
-```bash
-# check-only
-uv run mypy . && uv run ruff check && uv run ruff format --check && uv run typos
+### Open JTalk を自分の波形合成器で使う
+SpeechTree はプリセットツールとして Open JTalk 出力を Tree へ変換するパーサーを提供しています。  
+また Tree から情報を取り出すユーティリティも提供しています。  
+これらにより、Tree からあなたの波形合成器に必要な情報を抜き出すプログラムを書くだけで、Open JTalk を TTS フロントエンド/テキスト処理部として利用できます。  
 
-## check-and-fix
-uv run mypy . && uv run ruff check --fix && uv run ruff format && uv run typos
+```python
+import pyopenjtalk
+
+# Open JTalk でテキスト処理をおこなう
+ojt_njd_features = pyopenjtalk.run_frontend("テキスト処理は Open JTalk に任せた！")
+
+# プリセットツールで Open JTalk NJD features を Tree へ変換する
+tree = parse_ojt_features(ojt_njd_features)
+
+# あなた独自の波形合成器向けに変換し、合成する
+your_features = tree_to_your_feature()
+audio = your_tts_backend(your_features)
 ```
+
+### VOICEVOX で自分のテキスト処理を使う
+SpeechTree はプリセットツールとして Tree を VOICEVOX API 引数へ変換するコンバーターを提供しています。  
+また Tree を生成するユーティリティも提供しています。  
+これらにより、あなたのテキスト処理の出力を Tree へパースするプログラムを書くだけで、VOICEVOX を TTS バックエンド/波形合成部として利用できます。  
+
+```python
+from speechtree.converters import convert_to_voicevox
+
+# あなた独自のテキスト処理をおこない、出力を Tree へ変換する
+text = "私の最強の NLP モジュール。"
+text_processing_features = your_tts_frontend(text)
+tree = your_features_to_tree()
+
+# プリセットツールで Tree を VOICEVOX 引数へ変換する
+accent_phrases = convert_to_voicevox(tree)
+
+# 起動済みの VOICEVOX ENGINE に API リクエストを送り、音声波形を合成する
+"POST /xxx?xx" 
+```
+
+## 仕様
+### Tree 構造体
+`Tree` は文を「ツリー - ブレスグループ/マークグループ - アクセント句 - ワード - モーラ - 音素」の木構造で表現した構造体です。  
+これらの階層構造が音素シンボル・発音・テキスト・役物・高低アクセントといった情報を持っています。  
+
+### ツール
+SpeechTree は `Tree` 構造体以外に以下の機能を提供します：  
+
+- ***プリセット presets***：著名な TTS フロントエンド/バックエンドを Tree と繋ぐ
+- ***ツール tools***：独自のフロントエンド/バックエンドで Tree を楽に扱う
+
+## 動機
+従来のTTS中間表現には「シンプルすぎる」という課題が有りました。  
+例えばフルコンテキストラベルは音素に特化しているためテキスト情報が不足し、テキストと音素の対応付けが困難でした。  
+
+かといって、様々なテキスト処理・合成器の入出力を全サポートして詰め込んだ「リッチすぎる」中間表現があっても扱いきれません。  
+この複雑さを内部詳細として隠すためクラスにすると、中間表現が言語に強く依存してしまいます。  
+
+これらを両立した中間表現が無いことが SpeechTree の動機です。  
+SpeechTree は editable な TTS に対象を絞り、それに必要十分な情報を見極め、これをシンプルな構造体として定義しています。  
 
 ### Design Docs
 Open JTalk `make_label()` 系（NJD のパーサーとその出力表現）が内部でどんな処理をしているか、web 上に情報がほぼない。  
@@ -142,6 +199,7 @@ SpeechTree は日本語標準語が第一言語である。そのため高低ア
 - 着想 ver3：「フルコンテキストラベルは情報が不足してる気がする」
 - 着想 ver4：「JPCommon への変換時に情報落としすぎている」
 - 着想 ver5：「もう少しリッチな中間表現が TTS には必要なのでは？」
+- 着目 ver6：「TTS ごとにモーラと音素が結構違う」
 
 #### Notes
 木構造 tree  
