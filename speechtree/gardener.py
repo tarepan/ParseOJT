@@ -1,7 +1,7 @@
 """Tree management tools."""
 
 # Check
-from speechtree.tree import MarkGroup, Tree
+from speechtree.tree import Tree
 
 
 # charset
@@ -15,9 +15,9 @@ def validate_tree(tree: Tree) -> None:
 
 def trim_head_tail_marks(tree: Tree) -> Tree:
     """Place holder."""
-    if isinstance(tree[0], MarkGroup):
+    if tree[0]["type"] == "MarkGroup":
         tree = tree[1:]
-    if isinstance(tree[-1], MarkGroup):
+    if tree[-1]["type"] == "MarkGroup":
         tree = tree[:-1]
     return tree
 
@@ -35,9 +35,9 @@ def extract_text(tree: Tree) -> str:
     """Extract the text of the tree."""
     text = ""
     for gp in tree:
-        for ap in gp.accent_phrases:
-            for wd in ap.words:
-                text += wd.text
+        for ap in gp["accent_phrases"]:
+            for wd in ap["words"]:
+                text += wd["text"]
     return text
 
 
@@ -45,10 +45,10 @@ def extract_pronunciation(tree: Tree) -> str:
     """Extract the pronunciation of the tree."""
     pronunciation = ""
     for gp in tree:
-        for ap in gp.accent_phrases:
-            for wd in ap.words:
-                for mr in wd.moras:
-                    pronunciation += mr.pronunciation
+        for ap in gp["accent_phrases"]:
+            for wd in ap["words"]:
+                for mr in wd["moras"]:
+                    pronunciation += mr["pronunciation"]
     return pronunciation
 
 
@@ -57,13 +57,13 @@ def extract_phonemes(
 ) -> list[str]:
     """Place holder."""
     phonemes: list[str] = []
-    for gp in tree:
-        for ap in gp.accent_phrases:
-            if reduce_dup_pau and isinstance(gp, MarkGroup):
+    for pg in tree:
+        for ap in pg["accent_phrases"]:
+            if reduce_dup_pau and pg["type"] == "MarkGroup":
                 phonemes += ["pau"]
             else:
-                for wd in ap.words:
-                    for mora in wd.moras:
+                for wd in ap["words"]:
+                    for mora in wd["moras"]:
                         _ = distinguish_unvoicing
-                        phonemes += [p.symbol for p in mora.phonemes]
+                        phonemes += [p["symbol"] for p in mora["phonemes"]]
     return phonemes

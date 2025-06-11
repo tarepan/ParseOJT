@@ -46,12 +46,16 @@ def _is_mora_pronunciation(pron: str) -> TypeGuard[MoraPronunciation]:
 def _parse_as_phonemes(
     mora_pron_unvoice: tuple[str, bool],
 ) -> tuple[Phoneme, Phoneme] | tuple[Phoneme]:
-    mora_pron = mora_pron_unvoice[0]
+    mora_pron, mora_unvoicing = mora_pron_unvoice
     if not _is_mora_pronunciation(mora_pron):
         raise RuntimeError
     consonant_symbol, vowel_symbol = MR_CV[mora_pron]
-    v = Phoneme(vowel_symbol, unvoicing=mora_pron_unvoice[1])
-    return (Phoneme(consonant_symbol), v) if consonant_symbol else (v,)
+    v = Phoneme(symbol=vowel_symbol, unvoicing=mora_unvoicing)
+
+    if consonant_symbol:
+        # NOTE: consonant is never unvoiced/無声化 because consonant is always unvoice/無声音.
+        return (Phoneme(symbol=consonant_symbol, unvoicing=False), v)
+    return (v,)
 
 
 def _parse_as_moras(feat: OjtFeature) -> list[Mora]:
@@ -77,15 +81,18 @@ def _parse_as_moras(feat: OjtFeature) -> list[Mora]:
 
     # Convert mr-wise pronunciation into Mora.
     moras: list[Mora] = []
-    for pron, unvoice in pron_unvoice_pairs:
+    for pron, unvoicing in pron_unvoice_pairs:
         match pron:
             case "ー":
-                v = Phoneme(moras[-1].phonemes[-1].symbol, unvoicing=unvoice)
-                moras.append(Mora((v,), pron))
+                symbol = moras[-1]["phonemes"][-1]["symbol"]
+                v = Phoneme(symbol=symbol, unvoicing=unvoicing)
+                moras.append(Mora(phonemes=(v,), pronunciation=pron))
             case "、" | "？":  # noqa: RUF001, because of Japanese.
-                moras.append(Mora((Phoneme("pau"),), pron[0]))
+                pau = Phoneme(symbol="pau", unvoicing=False)
+                moras.append(Mora(phonemes=(pau,), pronunciation=pron[0]))
             case _:
-                moras.append(Mora(_parse_as_phonemes((pron, unvoice)), pron))
+                pns = _parse_as_phonemes((pron, unvoicing))
+                moras.append(Mora(phonemes=pns, pronunciation=pron))
 
     return moras
 
@@ -102,13 +109,13 @@ def _parse_as_ap(feats: list[OjtFeature]) -> AccentPhrase:
     words: list[Word] = []
     for feat in feats:
         moras = _parse_as_moras(feat)
-        words.append(Word(moras, feat.string))
+        words.append(Word(moras=moras, text=feat.string))
         n_mora += len(moras)
     # NOTE: OJT records the phrase accent type in ap-head feature
     acc = feats[0].acc
     # NOTE: Convert accent type into accent (アクセント核) position. Type 0 has 核 at last.
     acc = acc if acc > 0 else n_mora
-    return AccentPhrase(words, acc)
+    return AccentPhrase(words=words, accent=acc)
 
 
 def _parse_as_aps(feats: list[OjtFeature]) -> list[AccentPhrase]:
@@ -158,5 +165,9 @@ def parse_ojt_as_tree(feats: list[OjtFeature]) -> Tree:
     # Divide features into successive voices (BreathGroup) and successive marks (MarkGroup).
     for is_marks, successive_feats in groupby(feats, _is_mark):
         aps = _parse_as_aps(list(successive_feats))
-        tree += [MarkGroup(aps) if is_marks else BreathGroup(aps)]
+        tree += [
+            MarkGroup(accent_phrases=aps, type="MarkGroup")
+            if is_marks
+            else BreathGroup(accent_phrases=aps, type="BreathGroup")
+        ]
     return tree

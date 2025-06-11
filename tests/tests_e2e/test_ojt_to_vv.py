@@ -3,7 +3,8 @@
 import pyopenjtalk  # type: ignore # noqa: PGH003, because of external library's type missing
 
 from speechtree.e2e import ojt_raw_features_to_vv_accent_phrases
-from speechtree.voicevox.domain import AccentPhrase, Mora
+from speechtree.voicevox.domain import AccentPhrase as VVAccentPhrase
+from speechtree.voicevox.domain import Mora as VVMora
 
 
 def test_ojt_raw_features_to_vv_accent_phrases_valid_text() -> None:
@@ -33,142 +34,142 @@ def test_ojt_raw_features_to_vv_accent_phrases_valid_text() -> None:
     #     assert False
     # ```
     true_vv_aps = [
-        AccentPhrase(
+        VVAccentPhrase(
             moras=[
-                Mora("ア", None, None, "a", 0.0, 0.0),
-                Mora("ア", None, None, "a", 0.0, 0.0),
+                VVMora("ア", None, None, "a", 0.0, 0.0),
+                VVMora("ア", None, None, "a", 0.0, 0.0),
             ],
             accent=1,
-            pause_mora=Mora("、", None, None, "pau", 0.0, 0.0),
+            pause_mora=VVMora("、", None, None, "pau", 0.0, 0.0),
             is_interrogative=False,
         ),
-        AccentPhrase(
+        VVAccentPhrase(
             moras=[
-                Mora("ド", "d", 0.0, "o", 0.0, 0.0),
-                Mora("オ", None, None, "o", 0.0, 0.0),
-                Mora("モ", "m", 0.0, "o", 0.0, 0.0),
+                VVMora("ド", "d", 0.0, "o", 0.0, 0.0),
+                VVMora("オ", None, None, "o", 0.0, 0.0),
+                VVMora("モ", "m", 0.0, "o", 0.0, 0.0),
             ],
             accent=1,
             pause_mora=None,
             is_interrogative=False,
         ),
-        AccentPhrase(
+        VVAccentPhrase(
             moras=[
-                Mora("コ", "k", 0.0, "o", 0.0, 0.0),
-                Mora("ン", None, None, "N", 0.0, 0.0),
-                Mora("ニ", "n", 0.0, "i", 0.0, 0.0),
-                Mora("チ", "ch", 0.0, "i", 0.0, 0.0),
-                Mora("ワ", "w", 0.0, "a", 0.0, 0.0),
-                Mora("デ", "d", 0.0, "e", 0.0, 0.0),
-                Mora("ス", "s", 0.0, "U", 0.0, 0.0),
+                VVMora("コ", "k", 0.0, "o", 0.0, 0.0),
+                VVMora("ン", None, None, "N", 0.0, 0.0),
+                VVMora("ニ", "n", 0.0, "i", 0.0, 0.0),
+                VVMora("チ", "ch", 0.0, "i", 0.0, 0.0),
+                VVMora("ワ", "w", 0.0, "a", 0.0, 0.0),
+                VVMora("デ", "d", 0.0, "e", 0.0, 0.0),
+                VVMora("ス", "s", 0.0, "U", 0.0, 0.0),
             ],
             accent=7,
-            pause_mora=Mora("、", None, None, "pau", 0.0, 0.0),
+            pause_mora=VVMora("、", None, None, "pau", 0.0, 0.0),
             is_interrogative=False,
         ),
-        AccentPhrase(
+        VVAccentPhrase(
             moras=[
-                Mora("オ", None, None, "o", 0.0, 0.0),
-                Mora("ヤ", "y", 0.0, "a", 0.0, 0.0),
+                VVMora("オ", None, None, "o", 0.0, 0.0),
+                VVMora("ヤ", "y", 0.0, "a", 0.0, 0.0),
             ],
             accent=1,
-            pause_mora=Mora("、", None, None, "pau", 0.0, 0.0),
+            pause_mora=VVMora("、", None, None, "pau", 0.0, 0.0),
             is_interrogative=True,
         ),
-        AccentPhrase(
+        VVAccentPhrase(
             moras=[
-                Mora("キョ", "ky", 0.0, "o", 0.0, 0.0),
-                Mora("オ", None, None, "o", 0.0, 0.0),
-                Mora("ワ", "w", 0.0, "a", 0.0, 0.0),
+                VVMora("キョ", "ky", 0.0, "o", 0.0, 0.0),
+                VVMora("オ", None, None, "o", 0.0, 0.0),
+                VVMora("ワ", "w", 0.0, "a", 0.0, 0.0),
             ],
             accent=1,
             pause_mora=None,
             is_interrogative=False,
         ),
-        AccentPhrase(
+        VVAccentPhrase(
             moras=[
-                Mora("キ", "k", 0.0, "i", 0.0, 0.0),
-                Mora("レ", "r", 0.0, "e", 0.0, 0.0),
-                Mora("エ", None, None, "e", 0.0, 0.0),
-                Mora("ナ", "n", 0.0, "a", 0.0, 0.0),
+                VVMora("キ", "k", 0.0, "i", 0.0, 0.0),
+                VVMora("レ", "r", 0.0, "e", 0.0, 0.0),
+                VVMora("エ", None, None, "e", 0.0, 0.0),
+                VVMora("ナ", "n", 0.0, "a", 0.0, 0.0),
             ],
             accent=1,
             pause_mora=None,
             is_interrogative=False,
         ),
-        AccentPhrase(
+        VVAccentPhrase(
             moras=[
-                Mora("カ", "k", 0.0, "a", 0.0, 0.0),
-                Mora("バ", "b", 0.0, "a", 0.0, 0.0),
-                Mora("ン", None, None, "N", 0.0, 0.0),
-                Mora("オ", None, None, "o", 0.0, 0.0),
+                VVMora("カ", "k", 0.0, "a", 0.0, 0.0),
+                VVMora("バ", "b", 0.0, "a", 0.0, 0.0),
+                VVMora("ン", None, None, "N", 0.0, 0.0),
+                VVMora("オ", None, None, "o", 0.0, 0.0),
             ],
             accent=4,
             pause_mora=None,
             is_interrogative=False,
         ),
-        AccentPhrase(
+        VVAccentPhrase(
             moras=[
-                Mora("オ", None, None, "o", 0.0, 0.0),
-                Mora("モ", "m", 0.0, "o", 0.0, 0.0),
-                Mora("チ", "ch", 0.0, "i", 0.0, 0.0),
-                Mora("デ", "d", 0.0, "e", 0.0, 0.0),
-                Mora("ス", "s", 0.0, "U", 0.0, 0.0),
-                Mora("ネ", "n", 0.0, "e", 0.0, 0.0),
+                VVMora("オ", None, None, "o", 0.0, 0.0),
+                VVMora("モ", "m", 0.0, "o", 0.0, 0.0),
+                VVMora("チ", "ch", 0.0, "i", 0.0, 0.0),
+                VVMora("デ", "d", 0.0, "e", 0.0, 0.0),
+                VVMora("ス", "s", 0.0, "U", 0.0, 0.0),
+                VVMora("ネ", "n", 0.0, "e", 0.0, 0.0),
             ],
             accent=6,
-            pause_mora=Mora("、", None, None, "pau", 0.0, 0.0),
+            pause_mora=VVMora("、", None, None, "pau", 0.0, 0.0),
             is_interrogative=False,
         ),
-        AccentPhrase(
+        VVAccentPhrase(
             moras=[
-                Mora("エ", None, None, "e", 0.0, 0.0),
-                Mora("ス", "s", 0.0, "u", 0.0, 0.0),
-                Mora("ピ", "p", 0.0, "i", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("シ", "sh", 0.0, "i", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("エ", None, None, "e", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("チ", "ch", 0.0, "i", 0.0, 0.0),
-                Mora("ティ", "t", 0.0, "i", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("ア", None, None, "a", 0.0, 0.0),
-                Mora("ア", None, None, "a", 0.0, 0.0),
-                Mora("ル", "r", 0.0, "u", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("イ", None, None, "i", 0.0, 0.0),
-                Mora("ノ", "n", 0.0, "o", 0.0, 0.0),
+                VVMora("エ", None, None, "e", 0.0, 0.0),
+                VVMora("ス", "s", 0.0, "u", 0.0, 0.0),
+                VVMora("ピ", "p", 0.0, "i", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("シ", "sh", 0.0, "i", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("エ", None, None, "e", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("チ", "ch", 0.0, "i", 0.0, 0.0),
+                VVMora("ティ", "t", 0.0, "i", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("ア", None, None, "a", 0.0, 0.0),
+                VVMora("ア", None, None, "a", 0.0, 0.0),
+                VVMora("ル", "r", 0.0, "u", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("イ", None, None, "i", 0.0, 0.0),
+                VVMora("ノ", "n", 0.0, "o", 0.0, 0.0),
             ],
             accent=23,
-            pause_mora=Mora("、", None, None, "pau", 0.0, 0.0),
+            pause_mora=VVMora("、", None, None, "pau", 0.0, 0.0),
             is_interrogative=False,
         ),
-        AccentPhrase(
+        VVAccentPhrase(
             moras=[
-                Mora("ブ", "b", 0.0, "u", 0.0, 0.0),
-                Mora("ラ", "r", 0.0, "a", 0.0, 0.0),
-                Mora("ン", None, None, "N", 0.0, 0.0),
-                Mora("ド", "d", 0.0, "o", 0.0, 0.0),
-                Mora("ヒ", "h", 0.0, "i", 0.0, 0.0),
-                Mora("ン", None, None, "N", 0.0, 0.0),
+                VVMora("ブ", "b", 0.0, "u", 0.0, 0.0),
+                VVMora("ラ", "r", 0.0, "a", 0.0, 0.0),
+                VVMora("ン", None, None, "N", 0.0, 0.0),
+                VVMora("ド", "d", 0.0, "o", 0.0, 0.0),
+                VVMora("ヒ", "h", 0.0, "i", 0.0, 0.0),
+                VVMora("ン", None, None, "N", 0.0, 0.0),
             ],
             accent=4,
-            pause_mora=Mora("、", None, None, "pau", 0.0, 0.0),
+            pause_mora=VVMora("、", None, None, "pau", 0.0, 0.0),
             is_interrogative=False,
         ),
-        AccentPhrase(
+        VVAccentPhrase(
             moras=[
-                Mora("デ", "d", 0.0, "e", 0.0, 0.0),
-                Mora("ス", "s", 0.0, "U", 0.0, 0.0),
-                Mora("カ", "k", 0.0, "a", 0.0, 0.0),
-                Mora("ア", None, None, "a", 0.0, 0.0),
+                VVMora("デ", "d", 0.0, "e", 0.0, 0.0),
+                VVMora("ス", "s", 0.0, "U", 0.0, 0.0),
+                VVMora("カ", "k", 0.0, "a", 0.0, 0.0),
+                VVMora("ア", None, None, "a", 0.0, 0.0),
             ],
             accent=1,
             pause_mora=None,

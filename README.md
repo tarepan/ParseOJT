@@ -225,9 +225,3 @@ char set とかを変えることで上手く validation できる。
 parser が各入力向けの Tree 製造機。  
 converter が各出力向けの Tree 消費機。  
 
-Gardener.trim_head_tail_marks(tree: Tree) -> Tree:
-  if tree.groups[0] is instanceof(MarkGroup):
-    tree.groups = tree.groups[1:]
-  if tree.groups[1] is instanceof(MarkGroup):
-    tree.groups = tree.groups[:-1]
-

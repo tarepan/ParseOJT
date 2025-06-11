@@ -1,11 +1,9 @@
 """SpeechTree tree and its elements."""
 
-from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, TypedDict
 
 
-@dataclass
-class Phoneme:
+class Phoneme(TypedDict):
     """
     音素。
 
@@ -15,11 +13,10 @@ class Phoneme:
     # NOTE: abbreviated as "PN/pn"
 
     symbol: str
-    unvoicing: bool = False
+    unvoicing: bool
 
 
-@dataclass
-class Mora:
+class Mora(TypedDict):
     """
     モーラ。
 
@@ -34,8 +31,7 @@ class Mora:
     pronunciation: str
 
 
-@dataclass
-class Word:
+class Word(TypedDict):
     """
     ワード。
 
@@ -49,8 +45,7 @@ class Word:
     text: str
 
 
-@dataclass
-class AccentPhrase:
+class AccentPhrase(TypedDict):
     """
     アクセント句。
 
@@ -64,24 +59,7 @@ class AccentPhrase:
     accent: int
 
 
-@dataclass
-class PhraseGroup:
-    """
-    フレーズグループ。
-
-    ひと続きのアクセント句。
-    グループを構成するアクセント句の列と、グループの種類を表現するタイプからなる。
-    """
-
-    # NOTE: abbreviated as "PG/pg"
-    # NOTE: Intended to be used as inheritance super class. Not intended to be instantiated directly.
-
-    accent_phrases: list[AccentPhrase]
-    type: Literal["BreathGroup", "MarkGroup"]
-
-
-@dataclass
-class BreathGroup(PhraseGroup):
+class BreathGroup(TypedDict):
     """
     ブレスグループ。
 
@@ -91,11 +69,11 @@ class BreathGroup(PhraseGroup):
 
     # NOTE: abbreviated as "BG/bg"
 
-    type: Literal["BreathGroup"] = "BreathGroup"
+    accent_phrases: list[AccentPhrase]
+    type: Literal["BreathGroup"]
 
 
-@dataclass
-class MarkGroup(PhraseGroup):
+class MarkGroup(TypedDict):
     """
     マークグループ。
 
@@ -105,7 +83,24 @@ class MarkGroup(PhraseGroup):
 
     # NOTE: abbreviated as "MG/mg"
 
-    type: Literal["MarkGroup"] = "MarkGroup"
+    accent_phrases: list[AccentPhrase]
+    type: Literal["MarkGroup"]
 
 
-type Tree = list[BreathGroup | MarkGroup]
+# フレーズグループ。ひと続きのアクセント句。グループを構成するアクセント句の列 `accent_phrases` と、グループの種類を表現するタイプ `type` からなる。
+type PhraseGroup = BreathGroup | MarkGroup
+"""
+フレーズグループ。
+
+ひと続きのアクセント句。
+グループを構成するアクセント句の列 `accent_phrases` と、グループの種類を表現するタイプ `type` からなる。
+"""
+# NOTE: abbreviated as "PG/pg"
+
+
+type Tree = list[PhraseGroup]
+"""
+ツリー。
+
+ブレスグループとマークグループが必ず交互に配置された列。先頭と末尾にグループ種別の制限は無い。
+"""

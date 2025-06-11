@@ -5,7 +5,7 @@ from typing import Final
 from warnings import warn
 
 from speechtree.gardener import extract_text
-from speechtree.tree import MarkGroup, PhraseGroup, Tree, Word
+from speechtree.tree import PhraseGroup, Tree, Word
 from speechtree.voicevox.domain import AccentPhrase, Mora
 
 _NON_VV_MORA_MAPPING = {
@@ -82,24 +82,23 @@ def _convert_words_to_voicevox_moras(words: list[Word]) -> list[Mora]:
     """Convert words into VOICEVOX moras."""
     vv_moras: list[Mora] = []
     for word in words:
-        for mora in word.moras:
-            phonemes = mora.phonemes
+        for mora in word["moras"]:
+            phonemes = mora["phonemes"]
 
-            consonant_symbol = None if len(phonemes) == 1 else phonemes[0].symbol
+            consonant_symbol = None if len(phonemes) == 1 else phonemes[0]["symbol"]
             consonant_length = None if len(phonemes) == 1 else 0.0
 
             vowel = phonemes[-1]
-            vowel_symbol = (
-                _unvoiced_symbol(vowel.symbol) if vowel.unvoicing else vowel.symbol
-            )
+            _v_symbol = vowel["symbol"]
+            v_symbol = _unvoiced_symbol(_v_symbol) if vowel["unvoicing"] else _v_symbol
             vowel_length = 0.0
 
-            pron = mora.pronunciation
+            pron = mora["pronunciation"]
             if pron[-1] == "’":  # noqa: RUF001, because of Japanese.
                 mora_text = pron[:-1]
             elif pron == "ー":
                 # NOTE: VOICEVOX losts prolonged sound mark. Only realized phonemes remain.
-                mora_text = _aiueo_to_mora_pron(vowel_symbol)
+                mora_text = _aiueo_to_mora_pron(v_symbol)
             else:
                 mora_text = pron
             vv_moras.append(
@@ -107,7 +106,7 @@ def _convert_words_to_voicevox_moras(words: list[Word]) -> list[Mora]:
                     text=_replace_mora_pron(mora_text),
                     consonant=consonant_symbol,
                     consonant_length=consonant_length,
-                    vowel=vowel_symbol,
+                    vowel=v_symbol,
                     vowel_length=vowel_length,
                 )
             )
@@ -117,9 +116,9 @@ def _convert_words_to_voicevox_moras(words: list[Word]) -> list[Mora]:
 def _contain_interrogative(pg: PhraseGroup) -> bool:
     """Whether the group contains interrogative or not."""
     text = ""
-    for ap in pg.accent_phrases:
-        for wd in ap.words:
-            text += wd.text
+    for ap in pg["accent_phrases"]:
+        for wd in ap["words"]:
+            text += wd["text"]
     return "？" in text  # noqa: RUF001, because of Japanese.
 
 
@@ -132,7 +131,7 @@ def convert_tree_to_voicevox_accent_phrases(
     # "無声化は /-a/ /-i/ /-u/ /-e/ /-o/ でのみ可能です。{vowel_symbol} には適用できないため無視されます。
 
     # Remove tree-head MarkGroup.
-    if isinstance(tree[0], MarkGroup):
+    if tree[0]["type"] == "MarkGroup":
         texts = extract_text(tree[0:1])
         msg = f"「{texts}」には音がありません。文頭に来れないため無視されます。"
         warn(msg, stacklevel=2)
@@ -151,15 +150,15 @@ def convert_tree_to_voicevox_accent_phrases(
         is_tail_bg = i == len(bg_mg_pairs) - 1
         is_interrogative_bg = _contain_interrogative(mg) if mg else False
 
-        for ap in bg.accent_phrases:
-            is_tail_ap = ap == bg.accent_phrases[-1]
+        for ap in bg["accent_phrases"]:
+            is_tail_ap = ap == bg["accent_phrases"][-1]
             # NOTE: VOICEVOX delete utterance tail pause.
             with_pau = is_tail_ap and not is_tail_bg
             interrogative = is_tail_ap and is_interrogative_bg
             vv_aps.append(
                 AccentPhrase(
-                    _convert_words_to_voicevox_moras(ap.words),
-                    accent=ap.accent,
+                    _convert_words_to_voicevox_moras(ap["words"]),
+                    accent=ap["accent"],
                     pause_mora=_gen_pau_mora() if with_pau else None,
                     is_interrogative=interrogative,
                 )
