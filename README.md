@@ -20,8 +20,8 @@ graph = parse_as_graph(tree)  # Beautiful graph, see below ✨️
 SpeechTree は日本語テキスト音声合成のテキスト処理と波形合成をつなぐ、シンプルかつリッチな中間表現およびツールです。  
 
 従来は各 TTS が各々実装していたテキスト処理と波形合成の接続を、SpeechTree が置き換えます。  
-波形合成器の開発者は Tree 入力に対応するだけで Open JTalk 等のテキスト処理を利用できます。  
-テキスト処理の開発者は Tree 出力に対応するだけで VOICEVOX 等の波形合成器が利用できます。  
+波形合成器の開発者は「`Tree` 入力に対応するだけ」で Open JTalk 等のテキスト処理を利用できます。  
+テキスト処理の開発者は「`Tree` 出力に対応するだけ」で VOICEVOX 等の波形合成器が利用できます。  
 
 ```mermaid
 graph TD;
@@ -29,6 +29,20 @@ graph TD;
     B --> C["VOICEVOX AccentPhrases"];
     B --> D["visual graph"];
 ```
+
+`Tree` 中間表現は従来のフルコンテキストラベルなどと比べてリッチです。  
+木構造により「ブレス-フレーズ-ワード-モーラ-音素」の階層を表現し、テキストと音素の対応関係を保持します。  
+また標準語 / 東京式アクセントはもちろん、関西弁 / 京阪式アクセントや、高知の早上がりアクセントにも対応できる柔軟な音調表現を持ちます。  
+
+[graph]
+
+「リッチな中間表現は扱いづらそう」「言語に依存してリッチさを得たんじゃないの？」  
+ご安心ください。`Tree` 中間表現は上の図が示す木構造そのもの、シンプルな入れ子構造体です。  
+構造体・リスト・文字列・ブールを扱えるプログラミング言語（=ほぼ全ての言語）ならどれでも簡単に `Tree` を扱えます。  
+
+そして SpeechTree は Python 開発者向けに `Tree` を扱う様々なツールを提供しています。  
+「カタカナ発音からモーラ列を生成」「アクセント句を結合」「音素列を取得」など、生成・編集・利用まで幅広くサポートします。  
+更に、著名な TTS ソフトウェア向けに一気通貫のプリセットパーサー・コンバーターを用意しています。  
 
 ## 使い方
 ### インストールする
@@ -75,10 +89,38 @@ accent_phrases = convert_to_voicevox(tree)
 "POST /xxx?xx" 
 ```
 
+### Python 以外の言語で扱う
+`Tree` 構造体の仕様が [#仕様]() にて定義されています（8個の構造体と7つの属性のみからなる、ごく単純な仕様です）。  
+
+
 ## 仕様
 ### Tree 構造体
 `Tree` は文を「ツリー - ブレスグループ/マークグループ - アクセント句 - ワード - モーラ - 音素」の木構造で表現した構造体です。  
-これらの階層構造が音素シンボル・発音・テキスト・役物・高低アクセントといった情報を持っています。  
+これらの階層構造が「テキスト、役物、発音、音調（アクセント）、音素シンボル、無声化」といった情報を持っています。  
+
+```
+Tree: list[PhraseGroup]
+  |
+  +-PhraseGroup
+      type: "BreathGroup" | "MarkGroup"
+      accent_phrases: list[AccentPhrase]
+        |
+        +-AccentPhrase
+            words: list[Word]
+              |
+              +-Word
+                  text: str
+                  moras: list[Mora]
+                    |
+                    +-Mora
+                      pronunciation: str
+                      tone_high: bool
+                      phonemes: (Phoneme, Phoneme) | (Phoneme,)
+                          |
+                          +-Phoneme
+                            symbol: str
+                            unvoicing: bool
+```
 
 ### ツール
 SpeechTree は `Tree` 構造体以外に以下の機能を提供します：  
