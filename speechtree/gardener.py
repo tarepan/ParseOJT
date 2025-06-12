@@ -1,10 +1,12 @@
 """Tree management tools."""
 
+from itertools import chain
+
+from speechtree.tree import AccentPhrase, Tree
+
 # Check
-from speechtree.tree import Tree
 
 
-# charset
 def validate_tree(tree: Tree) -> None:
     """Place holder."""
     _ = tree
@@ -67,3 +69,15 @@ def extract_phonemes(
                         _ = distinguish_unvoicing
                         phonemes += [p["symbol"] for p in mora["phonemes"]]
     return phonemes
+
+
+def extract_accent_position(ap: AccentPhrase) -> int:
+    """Extract accent position of the accent phrase."""
+    ap_moras = list(chain.from_iterable([wd["moras"] for wd in ap["words"]]))
+    accent = len(ap_moras)
+    for mora in reversed(ap_moras):
+        if not mora["tone_high"]:
+            accent -= 1
+        else:
+            break
+    return accent

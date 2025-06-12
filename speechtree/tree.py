@@ -29,6 +29,7 @@ class Mora(TypedDict):
 
     phonemes: tuple[Phoneme, Phoneme] | tuple[Phoneme]  # CV | V
     pronunciation: str
+    tone_high: bool
 
 
 class Word(TypedDict):
@@ -56,7 +57,6 @@ class AccentPhrase(TypedDict):
     # NOTE: abbreviated as "AP/ap"
 
     words: list[Word]
-    accent: int
 
 
 class BreathGroup(TypedDict):

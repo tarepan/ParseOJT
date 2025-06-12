@@ -80,19 +80,20 @@ def _parse_as_moras(feat: OjtFeature) -> list[Mora]:
         pron_unvoice_pairs = pron_unvoice_pairs[1:]
 
     # Convert mr-wise pronunciation into Mora.
+    # NOTE: `tone_high` is fixed to False. Need update after.
     moras: list[Mora] = []
     for pron, unvoicing in pron_unvoice_pairs:
         match pron:
             case "ー":
                 symbol = moras[-1]["phonemes"][-1]["symbol"]
                 v = Phoneme(symbol=symbol, unvoicing=unvoicing)
-                moras.append(Mora(phonemes=(v,), pronunciation=pron))
+                moras.append(Mora(phonemes=(v,), pronunciation=pron, tone_high=False))
             case "、" | "？":  # noqa: RUF001, because of Japanese.
                 pau = Phoneme(symbol="pau", unvoicing=False)
-                moras.append(Mora(phonemes=(pau,), pronunciation=pron[0]))
+                moras.append(Mora(phonemes=(pau,), pronunciation="　", tone_high=False))
             case _:
                 pns = _parse_as_phonemes((pron, unvoicing))
-                moras.append(Mora(phonemes=pns, pronunciation=pron))
+                moras.append(Mora(phonemes=pns, pronunciation=pron, tone_high=False))
 
     return moras
 
@@ -105,17 +106,26 @@ def _is_chaining(feat: OjtFeature) -> bool:
 def _parse_as_ap(feats: list[OjtFeature]) -> AccentPhrase:
     """Parse Open JTalk features into an accent phrase."""
     # NOTE: length of `feats` is not zero (contract)
-    n_mora: int = 0
+    ap_moras: list[Mora] = []
     words: list[Word] = []
     for feat in feats:
-        moras = _parse_as_moras(feat)
-        words.append(Word(moras=moras, text=feat.string))
-        n_mora += len(moras)
-    # NOTE: OJT records the phrase accent type in ap-head feature
-    acc = feats[0].acc
-    # NOTE: Convert accent type into accent (アクセント核) position. Type 0 has 核 at last.
-    acc = acc if acc > 0 else n_mora
-    return AccentPhrase(words=words, accent=acc)
+        wd_moras = _parse_as_moras(feat)
+        words.append(Word(moras=wd_moras, text=feat.string))
+        ap_moras += wd_moras
+
+    # Update tone based on 東京式アクセント rule.
+    # NOTE: OJT records the phrase accent type in ap-head feature.
+    # Convert accent type into accent position.
+    acc_pos = feats[0].acc if feats[0].acc > 0 else len(ap_moras)
+    # Switch tone to high until accent position
+    for i, mora in enumerate(ap_moras):
+        if i < acc_pos:
+            mora["tone_high"] = True
+    # Switch tone to low at head if not type1.
+    if acc_pos > 1:
+        ap_moras[0]["tone_high"] = False
+
+    return AccentPhrase(words=words)
 
 
 def _parse_as_aps(feats: list[OjtFeature]) -> list[AccentPhrase]:

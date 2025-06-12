@@ -4,7 +4,7 @@ from itertools import batched
 from typing import Final
 from warnings import warn
 
-from speechtree.gardener import extract_text
+from speechtree.gardener import extract_accent_position, extract_text
 from speechtree.tree import PhraseGroup, Tree, Word
 from speechtree.voicevox.domain import AccentPhrase, Mora
 
@@ -158,7 +158,7 @@ def convert_tree_to_voicevox_accent_phrases(
             vv_aps.append(
                 AccentPhrase(
                     _convert_words_to_voicevox_moras(ap["words"]),
-                    accent=ap["accent"],
+                    accent=extract_accent_position(ap),
                     pause_mora=_gen_pau_mora() if with_pau else None,
                     is_interrogative=interrogative,
                 )
